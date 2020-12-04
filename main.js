@@ -10,6 +10,7 @@ const modalPages = document.querySelector('#book-pages');
 const modalIsRead = document.querySelector('#book-read');
 const allBooks = document.getElementsByClassName('book');
 
+
 let theCollection = [];
 
 function Book(title, author, pages, isRead){
@@ -28,14 +29,10 @@ function resetModal(){
     modalIsRead.checked = false;
 }
 
-const theHobbit = new Book("The Hobbit", "JRR Tolkein", "200", true);
-const theKiteRunner = new Book("The Kite Runner", "Some guy", "360", true);
-
-theCollection.push(theHobbit);
-theCollection.push(theKiteRunner);
-
 function addBookToLibrary(){
+    let i = 0;
     theCollection.forEach(book => {
+        book.index = i;
         const cardDiv = document.createElement('div');
 		const titleDiv = document.createElement('div');
 		const authorDiv = document.createElement('div');
@@ -54,8 +51,9 @@ function addBookToLibrary(){
 		titleDiv.classList.add('info');
 		titleDiv.setAttribute('id', 'title');
 		cardButtonsDiv.classList.add('book-buttons');
-		readButton.setAttribute('id', 'is-read');
-		removeButton.setAttribute('id', 'delete');
+		readButton.setAttribute('class', 'is-read');
+        removeButton.setAttribute('class', 'delete');
+        removeButton.setAttribute('dataAttribute', i);
         bookshelfContainer.appendChild(cardDiv);
         cardDiv.appendChild(titleDiv);
         cardDiv.appendChild(authorDiv);
@@ -66,6 +64,7 @@ function addBookToLibrary(){
         titleDiv.innerHTML = book.title;
         authorDiv.innerHTML = book.author;
         pagesDiv.innerHTML = book.pages;
+        i++;
         
         if(book.isRead === true) {
         	readButton.innerHTML = "Read";
@@ -73,7 +72,6 @@ function addBookToLibrary(){
         removeButton.innerHTML = "Remove";
     });
 }
-addBookToLibrary();
 
 newBookButton.addEventListener('click', () => {
     modalContainer.style.display = "inline-block"; 
@@ -84,22 +82,53 @@ cancelButton.addEventListener('click', () => {
 })
 
 submitButton.addEventListener('click', () =>{
-    console.log(typeof parseInt(modalPages.value))
-    if(modalTitle.value === ''|| modalAuthor.value === '' || modalPages.value === '' || typeof parseInt(modalPages.value) !== 'number'){
+    if(modalTitle.value === ''|| modalAuthor.value === '' || modalPages.value === ''){
         resetModal();
         return
     }
 
-    let readOrNot = '';
+    let readOrNot;
     if (modalIsRead.checked === true){
-        readOrNot = 'Read';
-    }else readOrNot = 'Not read';
+        readOrNot = true;
+    }else readOrNot = false;
 
     theCollection.push(new Book(modalTitle.value, modalAuthor.value, modalPages.value, readOrNot));
+
     Array.from(allBooks).forEach(book => {
         book.remove();
     });
+    
     addBookToLibrary();
+    addEventListenerToBooks();
     resetModal();
-    console.log(theCollection)
 })
+
+function addEventListenerToBooks() {
+    const readButtons = document.querySelectorAll('.is-read');
+    const deleteButtons = document.querySelectorAll('.delete');
+
+    readButtons.forEach((book) =>{
+        book.addEventListener('click', (e) => {
+            if(e.target.textContent === "Read"){
+                e.target.textContent = "Not read";
+            }else e.target.textContent = "Read"; 
+        })
+    })
+
+    deleteButtons.forEach((book) =>{
+        book.addEventListener(('click'), () =>{
+            theCollection.forEach((bookObj) => {
+                if(bookObj.index == book.getAttribute('dataAttribute')){
+                    theCollection.splice(bookObj.index, 1);9
+                    Array.from(allBooks).forEach(book => {
+                        book.remove();
+                    });
+                    addBookToLibrary();
+                    addEventListenerToBooks();
+                    
+                }
+            })
+        })
+    })
+}
+
