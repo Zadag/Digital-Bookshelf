@@ -33,6 +33,7 @@ body {
     border-radius: 10%;
     background-color: lightgray;
     margin-top: 3vh;
+    font-size: 3vh;
 }
 #add-book {
     color: white;

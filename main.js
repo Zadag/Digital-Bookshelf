@@ -12,6 +12,25 @@ const allBooks = document.getElementsByClassName('book');
 
 
 let theCollection = [];
+let storedArray = [];
+
+//Remove all book cards from the DOM. This prevents duplicate books.
+function clearDom(){
+    Array.from(allBooks).forEach(book => {
+        book.remove();
+    });
+}
+
+//Saves the array of books to local storage.
+function saveTheCollection(){
+    localStorage.setItem('storedArray', JSON.stringify(theCollection));
+}
+
+function parseTheCollection(){
+    let books = localStorage.getItem('storedArray');
+    books = JSON.parse(books);
+    theCollection = books;    
+}
 
 function Book(title, author, pages, isRead){
     this.title = title;
@@ -29,7 +48,8 @@ function resetModal(){
     modalIsRead.checked = false;
 }
 
-function addBookToLibrary(){
+//Builds a card to display information about the book object.
+function createDomElements(){
     let i = 0;
     theCollection.forEach(book => {
         book.index = i;
@@ -51,7 +71,8 @@ function addBookToLibrary(){
 		titleDiv.classList.add('info');
 		titleDiv.setAttribute('id', 'title');
 		cardButtonsDiv.classList.add('book-buttons');
-		readButton.setAttribute('class', 'is-read');
+        readButton.setAttribute('class', 'is-read');
+        readButton.setAttribute('dataAttribute', i);
         removeButton.setAttribute('class', 'delete');
         removeButton.setAttribute('dataAttribute', i);
         bookshelfContainer.appendChild(cardDiv);
@@ -63,7 +84,7 @@ function addBookToLibrary(){
 		cardButtonsDiv.appendChild(removeButton);
         titleDiv.innerHTML = book.title;
         authorDiv.innerHTML = book.author;
-        pagesDiv.innerHTML = book.pages;
+        pagesDiv.innerHTML = book.pages + ' pages';
         i++;
         
         if(book.isRead === true) {
@@ -71,6 +92,7 @@ function addBookToLibrary(){
         }else readButton.innerHTML = "Not Read";
         removeButton.innerHTML = "Remove";
     });
+    saveTheCollection();
 }
 
 newBookButton.addEventListener('click', () => {
@@ -81,6 +103,7 @@ cancelButton.addEventListener('click', () => {
     resetModal();
 })
 
+//Checks to see if all inputs are valid and creates a new book object.
 submitButton.addEventListener('click', () =>{
     if(modalTitle.value === ''|| modalAuthor.value === '' || modalPages.value === ''){
         resetModal();
@@ -93,12 +116,8 @@ submitButton.addEventListener('click', () =>{
     }else readOrNot = false;
 
     theCollection.push(new Book(modalTitle.value, modalAuthor.value, modalPages.value, readOrNot));
-
-    Array.from(allBooks).forEach(book => {
-        book.remove();
-    });
-    
-    addBookToLibrary();
+    clearDom();
+    createDomElements();
     addEventListenerToBooks();
     resetModal();
 })
@@ -108,10 +127,17 @@ function addEventListenerToBooks() {
     const deleteButtons = document.querySelectorAll('.delete');
 
     readButtons.forEach((book) =>{
-        book.addEventListener('click', (e) => {
-            if(e.target.textContent === "Read"){
-                e.target.textContent = "Not read";
-            }else e.target.textContent = "Read"; 
+        theCollection.forEach(bookObj => {
+            book.addEventListener(('click'), (e) => {
+                if(bookObj.index == book.getAttribute('dataAttribute')){
+                    if(bookObj.isRead === true){
+                        bookObj.isRead = false;
+                    }else bookObj.isRead = true;
+                }
+                clearDom();
+                createDomElements();
+                addEventListenerToBooks();
+            })
         })
     })
 
@@ -119,11 +145,9 @@ function addEventListenerToBooks() {
         book.addEventListener(('click'), () =>{
             theCollection.forEach((bookObj) => {
                 if(bookObj.index == book.getAttribute('dataAttribute')){
-                    theCollection.splice(bookObj.index, 1);9
-                    Array.from(allBooks).forEach(book => {
-                        book.remove();
-                    });
-                    addBookToLibrary();
+                    theCollection.splice(bookObj.index, 1);
+                    clearDom();
+                    createDomElements();
                     addEventListenerToBooks();
                     
                 }
@@ -132,3 +156,9 @@ function addEventListenerToBooks() {
     })
 }
 
+function restoreThePage(){
+    parseTheCollection();
+    createDomElements();
+    addEventListenerToBooks();
+}
+restoreThePage();
