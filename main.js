@@ -157,6 +157,7 @@ function addEventListenerToBooks() {
 }
 
 function restoreThePage(){
+    if(theCollection.length < 1) return
     parseTheCollection();
     createDomElements();
     addEventListenerToBooks();
