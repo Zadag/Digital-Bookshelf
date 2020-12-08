@@ -162,4 +162,5 @@ function restoreThePage(){
     createDomElements();
     addEventListenerToBooks();
 }
+parseTheCollection();
 restoreThePage();
