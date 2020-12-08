@@ -1,4 +1,3 @@
-const shelfContainer = document.querySelector('.bookshelf-container');
 const newBookButton = document.querySelector('#add-book')
 const bookshelfContainer = document.querySelector('.bookshelf-container');
 const submitButton = document.querySelector('#submit');
@@ -115,7 +114,8 @@ submitButton.addEventListener('click', () =>{
         readOrNot = true;
     }else readOrNot = false;
 
-    theCollection.push(new Book(modalTitle.value, modalAuthor.value, modalPages.value, readOrNot));
+    let book = new Book(modalTitle.value, modalAuthor.value, modalPages.value, readOrNot);
+    theCollection.push(book);
     clearDom();
     createDomElements();
     addEventListenerToBooks();
